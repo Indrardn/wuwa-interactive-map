@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wuthering Waves Universe Map — Jinzhou / Jizhou to Mengzhou (v3.8)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0B0E14;
+      --bg-panel: #121824;
+      --bg-card: #182234;
+      --border-color: #26354D;
+      --accent-cyan: #00E5FF;
+      --accent-gold: #FFB703;
+      --accent-quest: #FFD166;
+      --accent-challenge: #FF3366;
+      --accent-open: #06D6A0;
+      --text-main: #F0F4FC;
+      --text-muted: #8E9AAF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); }
+
+    #app { display: flex; width: 100vw; height: 100vh; position: relative; }
+
+    /* SIDEBAR NAVIGATION */
+    #sidebar {
+      width: 420px;
+      height: 100%;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sidebar-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(180deg, #162030 0%, #121824 100%);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #FFF;
+    }
+
+    .brand-title span {
+      background: linear-gradient(90deg, #00E5FF, #FFB703);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* REGION SWITCHER DROPDOWN */
+    .region-select-box {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .region-select-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+
+    .region-select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0E141E;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #FFF;
+      font-size: 13px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .region-select:focus { border-color: var(--accent-cyan); }
+
+    .search-bar {
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      background: #0E141E;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #FFF;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar input:focus { border-color: var(--accent-cyan); }
+    .search-bar svg { position: absolute; left: 12px; top: 11px; fill: var(--text-muted); width: 14px; height: 14px; }
+
+    /* SCROLLABLE FILTER CONTENT */
+    .filter-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .filter-content::-webkit-scrollbar { width: 6px; }
+    .filter-content::-webkit-scrollbar-thumb { background: #26354D; border-radius: 3px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* THREE DISTINCT CHEST ACQUISITION CATEGORIES (MAIN REQUEST) */
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .category-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .category-card:hover { border-color: #3B4E6E; background: #1C273B; }
+    .category-card.active { border-color: currentColor; background: rgba(255,255,255,0.04); }
+
+    .cat-info { display: flex; align-items: center; gap: 10px; }
+    .cat-icon-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .cat-text .cat-name { font-size: 13px; font-weight: 700; color: #FFF; display: flex; align-items: center; gap: 6px; }
+    .cat-text .cat-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .count-pill {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #0E141E;
+      color: #FFF;
+      border: 1px solid var(--border-color);
+    }
+
+    /* SUB-AREA CHIPS */
+    .area-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .area-chip {
+      background: #101622;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .area-chip:hover { color: #FFF; border-color: var(--accent-cyan); }
+    .area-chip.active { background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    /* STATS FOOTER */
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-color);
+      background: #0E141E;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-box { flex: 1; }
+    .progress-bar-bg { width: 100%; height: 6px; background: #26354D; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00E5FF, #FFB703); transition: width 0.3s; }
+
+    /* MAP CONTAINER */
+    #map-wrapper {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      background: #090C12;
+    }
+
+    #map { width: 100%; height: 100%; background: #090C12; }
+
+    /* CUSTOM LEAFLET PIN STYLING */
+    .custom-marker-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #FFF;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .custom-marker-icon:hover { transform: scale(1.3); z-index: 9999 !important; }
+    .custom-marker-icon.collected { opacity: 0.35; filter: grayscale(1); border-color: #666; }
+
+    /* CUSTOM DETAILED POPUP STYLING */
+    .leaflet-popup-content-wrapper {
+      background: #121824 !important;
+      color: #FFF !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+      padding: 0 !important;
+      overflow: hidden;
+    }
+    .leaflet-popup-content { margin: 0 !important; width: 320px !important; }
+    .leaflet-popup-tip { background: #121824 !important; border: 1px solid var(--border-color); }
+
+    .popup-card { padding: 16px; }
+    .popup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .popup-title { font-size: 15px; font-weight: 800; color: #FFF; margin-bottom: 4px; }
+    .popup-area { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+
+    .guide-box {
+      background: #0A0D14;
+      border: 1px solid #1E293B;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #CBD5E1;
+    }
+    .guide-box strong { color: var(--accent-cyan); display: block; margin-bottom: 2px; }
+
+    .reward-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-top: 8px;
+      border-top: 1px solid #1E293B;
+    }
+    .reward-item { font-size: 11px; font-weight: 700; color: #F1F5F9; display: flex; align-items: center; gap: 4px; }
+
+    .btn-collect {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-collect.unclaimed { background: var(--accent-cyan); color: #05101E; }
+    .btn-collect.unclaimed:hover { background: #4DF0FF; }
+    .btn-collect.claimed { background: #26354D; color: #94A3B8; }
+    .btn-collect.claimed:hover { background: #334460; color: #FFF; }
+
+    /* FLOATING TOOLS */
+    .floating-tools {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      color: #FFF;
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .tool-btn:hover { border-color: var(--accent-cyan); background: #1A2234; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- SIDEBAR CONTROLLER -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#00E5FF" stroke-width="2.5"/><path d="M12 6L15 12L12 18L9 12Z" fill="#FFB703"/></svg>
+        <span>WuWa Map: Universe</span>
+      </div>
+
+      <!-- MAJOR REGION SELECTOR (JINZHOU, MENGZHOU, LAHAI-ROI, MT FIRMAMENT) -->
+      <div class="region-select-box">
+        <div class="region-select-label">Pilih Wilayah (Region):</div>
+        <select class="region-select" id="regionSelector" onchange="changeRegion(this.value)">
+          <option value="jinzhou">1. Jinzhou (Jizhou) — Huanglong (10 Sub-Area)</option>
+          <option value="mengzhou">2. Mengzhou (v3.7) — Xuanfang & Simulacrum</option>
+          <option value="rinascita" selected>3. Rinascita (Ragunna) — City of Canals</option>
+          <option value="septimont">4. Septimont & Sanguis Plateaus — Highlands</option>
+          <option value="black_shores">5. The Black Shores — Tethys' Deep</option>
+          <option value="lahai_roi">6. Lahai-Roi (v3.0) — Roya Underground</option>
+          <option value="mt_firmament">7. Mt. Firmament — Hongzhen & Sentinel Jue</option>
+        </select>
+      </div>
+
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="Cari nama chest, misi, atau puzzle..." oninput="handleSearch()">
+      </div>
+    </div>
+
+    <div class="filter-content">
+      <!-- 3 DISTINCT CHEST CLASSIFICATIONS -->
+      <div>
+        <div class="section-label">
+          <span>Kategori Asal Chest (Pembeda)</span>
+          <span style="font-size:10px; cursor:pointer; color:var(--accent-cyan);" onclick="toggleAllCategories()">Toggle All</span>
+        </div>
+        <div class="filter-group">
+          <!-- 1. OPEN WORLD CHESTS -->
+          <div class="category-card active" id="cat-open_world" style="color: var(--accent-open);" onclick="toggleCategory('open_world')">
+            <div class="cat-info">
+              <div class="cat-icon-badge" style="background: rgba(6, 214, 160, 0.15); color: var(--accent-open);">🗺️</div>
+              <div class="cat-text">
+                <div class="cat-name">Emang Ada di Map</div>
+                <div class="cat-sub">Free standing, duri bramble, dijaga monster</div>
+              </div>
+            </div>
+            <span class="count-pill" id="count-open_world">0</span>
+          </div>
+
+          <!-- 2. QUEST / STORY CHESTS -->
+          <div class="category-card active" id="cat-quest" style="color: var(--accent-quest);" onclick="toggleCategory('quest')">
+            <div class="cat-info">
+              <div class="cat-icon-badge" style="background: rgba(255, 209, 102, 0.15); color: var(--accent-quest);">📜</div>
+              <div class="cat-text">
+                <div class="cat-name">Didapat dari Misi / Quest</div>
+                <div class="cat-sub">Hadiah Main Act, Regional World, Companion</div>
+              </div>
+            </div>
+            <span class="count-pill" id="count-quest">0</span>
+          </div>
+
+          <!-- 3. HIDDEN CHALLENGES & PUZZLES -->
+          <div class="category-card active" id="cat-hidden_challenge" style="color: var(--accent-challenge);" onclick="toggleCategory('hidden_challenge')">
+            <div class="cat-info">
+              <div class="cat-icon-badge" style="background: rgba(255, 51, 102, 0.15); color: var(--accent-challenge);">🧩</div>
+              <div class="cat-text">
+                <div class="cat-name">Hidden Challenge & Puzzle</div>
+                <div class="cat-sub">Smartprint Cube, Mutterfly, Blobfly, Pelat</div>
+              </div>
+            </div>
+            <span class="count-pill" id="count-hidden_challenge">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER SUB-AREAS LAHAI-ROI / JINZHOU / MENGZHOU -->
+      <div>
+        <div class="section-label">
+          <span id="subareaHeaderLabel">Sub-Area Wilayah</span>
+          <span style="font-size:10px; cursor:pointer; color:var(--accent-cyan);" onclick="resetAreaFilter()">Semua</span>
+        </div>
+        <div class="area-chips" id="areaChipsContainer"></div>
+      </div>
+
+      <!-- FILTER TIER PETI -->
+      <div>
+        <div class="section-label"><span>Filter Tingkatan Peti</span></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;" id="tierChipsContainer"></div>
+      </div>
+    </div>
+
+    <!-- STATS FOOTER -->
+    <div class="sidebar-footer">
+      <div class="progress-box">
+        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700;">
+          <span id="progressRegionName">Progres Region Mengzhou</span>
+          <span id="progressText" style="color:var(--accent-cyan); font-family:'JetBrains Mono';">0 / 0 (0%)</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP INTERACTIVE VIEWPORT -->
+  <main id="map-wrapper">
+    <div id="map"></div>
+
+    <!-- FLOATING QUICK TOGGLES -->
+    <div class="floating-tools">
+      <button class="tool-btn" onclick="toggleSidebar()">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        Panel Filter
+      </button>
+      <button class="tool-btn" onclick="toggleCollectedVisibility()">
+        <span id="collectedVisibilityIcon">👁️</span>
+        <span id="collectedVisibilityText">Sembunyikan Sudah Diambil</span>
+      </button>
+      <button class="tool-btn" onclick="resetProgress()" style="color:#FF7B72;">
+        🔄 Reset Progres
+      </button>
+    </div>
+  </main>
+</div>
+
+<script>
+  let rawData = null;
+  let currentRegionKey = "mengzhou";
+  let currentRegionData = null;
+  let map = null;
+  let currentOverlay = null;
+  let markersLayer = null;
+  let allMarkers = [];
+  let collectedIds = new Set();
+  let showCollected = true;
+  let sidebarOpen = true;
+
+  let activeCategories = { open_world: true, quest: true, hidden_challenge: true };
+  let selectedArea = 'all';
+  let activeTiers = { basic: true, standard: true, advanced: true, premium: true, tidal_heritage: true, sonance_casket: true };
+
+  const CAT_COLORS = {
+    open_world: '#06D6A0',
+    quest: '#FFD166',
+    hidden_challenge: '#FF3366'
+  };
+
+  const TIER_COLORS = {
+    basic: '#8E9AAF',
+    standard: '#06D6A0',
+    advanced: '#118AB2',
+    premium: '#9D4EDD',
+    tidal_heritage: '#FFB703',
+    sonance_casket: '#00F5D4'
+  };
+
+  // GENERATE CUSTOM VECTOR MAP BACKDROPS PER REGION
+  function getRegionSvg(regionKey) {
+    if (regionKey === "rinascita") {
+      // Rinascita / Ragunna: Venice-style canal network, Averardo Vault, Riccioli Islands
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#09121E"/>
+          <defs><pattern id="gr" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#16263E" stroke-width="1"/></pattern></defs>
+          <rect width="1000" height="1000" fill="url(#gr)" />
+          <!-- Grand Canal Network -->
+          <path d="M 80 480 Q 300 350 500 500 T 920 480" fill="none" stroke="#00E5FF" stroke-width="45" stroke-opacity="0.3" stroke-linecap="round"/>
+          <path d="M 500 500 Q 520 750 480 920" fill="none" stroke="#00E5FF" stroke-width="30" stroke-opacity="0.25" stroke-linecap="round"/>
+          <!-- Ragunna City Cathedral Core -->
+          <rect x="420" y="420" width="160" height="160" rx="18" fill="#1A2840" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="500" y="505" fill="#FFB703" font-size="14" font-weight="bold" text-anchor="middle">RAGUNNA CITY</text>
+          <!-- Averardo Vault -->
+          <circle cx="740" cy="350" r="75" fill="#1E1630" stroke="#9D4EDD" stroke-width="2"/>
+          <text x="740" y="355" fill="#9D4EDD" font-size="11" font-weight="bold" text-anchor="middle">AVERARDO VAULT</text>
+          <!-- Riccioli Islands -->
+          <circle cx="780" cy="720" r="85" fill="#142C30" stroke="#06D6A0" stroke-width="2"/>
+          <text x="780" y="725" fill="#06D6A0" font-size="12" font-weight="bold" text-anchor="middle">RICCIOLI ISLANDS</text>
+        </svg>
+      `;
+    } else if (regionKey === "septimont") {
+      // Septimont: 7 Imperial Hills, Colosseum Arena, Red Sanguis Plateaus
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#130D14"/>
+          <defs><radialGradient id="sangGrad" cx="75%" cy="32%" r="45%"><stop offset="0%" stop-color="#E63946" stop-opacity="0.3"/><stop offset="100%" stop-color="#130D14" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="760" cy="320" r="280" fill="url(#sangGrad)" />
+          <!-- Septimont Fortress & Capitoline Hill -->
+          <polygon points="420,550 510,380 600,550" fill="#241B26" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="510" y="500" fill="#FFB703" font-size="13" font-weight="bold" text-anchor="middle">SEPTIMONT CITY</text>
+          <!-- Sanguis Plateaus -->
+          <rect x="640" y="200" width="240" height="220" rx="16" fill="#2E1418" stroke="#E63946" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="760" y="315" fill="#E63946" font-size="13" font-weight="bold" text-anchor="middle">SANGUIS PLATEAUS</text>
+          <!-- Titanbone Canyon -->
+          <path d="M 160 220 Q 300 350 280 750" fill="none" stroke="#8E9AAF" stroke-width="12" stroke-opacity="0.4"/>
+        </svg>
+      `;
+    } else if (regionKey === "black_shores") {
+      // Black Shores: Quantum Data Hub, Tethys Deep, Black Petals
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#080A10"/>
+          <defs><radialGradient id="tethysGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00E5FF" stop-opacity="0.3"/><stop offset="100%" stop-color="#080A10" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="500" cy="500" r="420" fill="url(#tethysGrad)" />
+          <!-- Quantum Data Streams -->
+          <circle cx="500" cy="500" r="160" fill="#0E1624" stroke="#00E5FF" stroke-width="3"/>
+          <text x="500" y="505" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">TETHYS' DEEP</text>
+          <!-- Chronorift Metropolis Ruin -->
+          <rect x="220" y="640" width="220" height="180" rx="14" fill="#141828" stroke="#9D4EDD" stroke-width="2"/>
+          <text x="330" y="735" fill="#9D4EDD" font-size="12" font-weight="bold" text-anchor="middle">CHRONORIFT</text>
+        </svg>
+      `;
+    }
+    if (regionKey === "mengzhou") {
+      // Mengzhou: Beautiful Waterways, Xuanfang Lake, Simulacrum Grid
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#09101C"/>
+          <defs>
+            <pattern id="g" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#162238" stroke-width="1"/></pattern>
+            <radialGradient id="simGrad" cx="70%" cy="75%" r="40%"><stop offset="0%" stop-color="#9D4EDD" stop-opacity="0.25"/><stop offset="100%" stop-color="#09101C" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="1000" height="1000" fill="url(#g)" />
+          <circle cx="700" cy="740" r="220" fill="url(#simGrad)" />
+          <!-- Xuanfang Rivers and Waterways -->
+          <path d="M 120 180 Q 320 280 500 480 T 880 750" fill="none" stroke="#00E5FF" stroke-width="28" stroke-opacity="0.3" stroke-linecap="round"/>
+          <path d="M 500 480 Q 350 720 180 850" fill="none" stroke="#00E5FF" stroke-width="16" stroke-opacity="0.2" stroke-linecap="round"/>
+          <!-- Mountains (Fang Peaks & Xuan Peaks) -->
+          <polygon points="180,320 280,240 380,320" fill="#141E30" stroke="#263854" stroke-width="2"/>
+          <polygon points="680,320 780,220 880,320" fill="#141E30" stroke="#263854" stroke-width="2"/>
+          <!-- Xuanfang Hold Fortress -->
+          <rect x="440" y="420" width="120" height="120" rx="14" fill="#18243C" stroke="#FFB703" stroke-width="2"/>
+          <text x="500" y="485" fill="#FFB703" font-size="14" font-weight="bold" text-anchor="middle">XUANFANG</text>
+          <!-- Simulacrum Nexus Virtual Core -->
+          <rect x="620" y="660" width="160" height="160" rx="20" fill="#1B1430" stroke="#9D4EDD" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="700" y="745" fill="#9D4EDD" font-size="13" font-weight="bold" text-anchor="middle">SIMULACRUM</text>
+        </svg>
+      `;
+    } else if (regionKey === "jinzhou") {
+      // Jinzhou: Grand Huanglong Valley, Gorges of Spirits, Tiger's Maw Crater, City
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#0A0E17"/>
+          <defs><pattern id="g2" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#162032" stroke-width="1"/></pattern></defs>
+          <rect width="1000" height="1000" fill="url(#g2)" />
+          <!-- Central Plains & Mountains -->
+          <path d="M 120 180 Q 500 100 850 180 T 880 750 Q 500 950 150 780 Z" fill="#101826" stroke="#263854" stroke-width="3"/>
+          <!-- Jinzhou City Center -->
+          <circle cx="500" cy="500" r="90" fill="#172238" stroke="#00E5FF" stroke-width="2.5"/>
+          <text x="500" y="505" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">JINZHOU CITY</text>
+          <!-- Tiger's Maw Mine Pit -->
+          <circle cx="530" cy="690" r="70" fill="#241E18" stroke="#FFB703" stroke-width="2" stroke-dasharray="4,4"/>
+          <text x="530" y="695" fill="#FFB703" font-size="11" font-weight="bold" text-anchor="middle">TIGER'S MAW</text>
+          <!-- Dim Forest Vines -->
+          <path d="M 200 680 Q 280 820 380 750" fill="none" stroke="#06D6A0" stroke-width="8" stroke-opacity="0.3"/>
+        </svg>
+      `;
+    } else if (regionKey === "mt_firmament") {
+      // Mt. Firmament: Sacred Floating Island of Sentinel Jue & Tianqu Tree
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#080C14"/>
+          <defs><radialGradient id="tianqu" cx="52%" cy="48%" r="45%"><stop offset="0%" stop-color="#FFB703" stop-opacity="0.25"/><stop offset="100%" stop-color="#080C14" stop-opacity="0"/></radialGradient></defs>
+          <circle cx="520" cy="480" r="420" fill="url(#tianqu)" />
+          <!-- Island Contour -->
+          <path d="M 250 380 Q 450 160 700 240 T 820 620 Q 620 880 320 800 Z" fill="#121B2C" stroke="#00E5FF" stroke-width="2.5"/>
+          <!-- Sacred Loong's Crest Peak -->
+          <polygon points="450,260 520,180 590,260" fill="#1C2740" stroke="#FFB703" stroke-width="2"/>
+          <text x="520" y="240" fill="#FFB703" font-size="12" font-weight="bold" text-anchor="middle">LOONG'S CREST</text>
+          <!-- Hongzhen Waterfront -->
+          <rect x="440" y="700" width="140" height="80" rx="10" fill="#19243A" stroke="#00E5FF" stroke-width="1.5"/>
+          <text x="510" y="745" fill="#00E5FF" font-size="12" font-weight="bold" text-anchor="middle">HONGZHEN</text>
+        </svg>
+      `;
+    } else {
+      // Lahai-Roi Cave
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#0A0E17"/>
+          <path d="M 120 280 Q 300 120 600 160 T 900 320 Q 950 650 780 880 T 350 900 Q 80 750 120 280 Z" fill="#101826" stroke="#263854" stroke-width="3"/>
+          <path d="M 280 400 Q 420 300 580 440 T 780 500 Q 650 720 420 680 Z" fill="#141E30" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="6,4"/>
+        </svg>
+      `;
+    }
+  }
+
+  // 1. INIT LEAFLET MAP
+  function initMap() {
+    map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -1.5,
+      maxZoom: 2,
+      zoomControl: false
+    });
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function setMapBackground(regionKey) {
+    const bounds = [[0, 0], [1000, 1000]];
+    const svgStr = getRegionSvg(regionKey);
+    const svgBlob = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+
+    if (currentOverlay) {
+      map.removeLayer(currentOverlay);
+    }
+    currentOverlay = L.imageOverlay(svgBlob, bounds).addTo(map);
+    map.fitBounds(bounds);
+  }
+
+  // 2. LOAD UNIVERSE DATABASE
+  async function loadData() {
+    try {
+      const res = await fetch('./data/all_regions.json');
+      rawData = await res.json();
+      loadProgress();
+      changeRegion(currentRegionKey);
+    } catch (e) {
+      console.error("Gagal load database:", e);
+    }
+  }
+
+  function loadProgress() {
+    const saved = localStorage.getItem('wuwa_universe_progress');
+    if (saved) {
+      try { collectedIds = new Set(JSON.parse(saved)); } catch(e){}
+    }
+  }
+  function saveProgress() {
+    localStorage.setItem('wuwa_universe_progress', JSON.stringify([...collectedIds]));
+    updateStats();
+  }
+
+  // 3. REGION SWITCHER HANDLER
+  window.changeRegion = function(regKey) {
+    currentRegionKey = regKey;
+    document.getElementById('regionSelector').value = regKey;
+    currentRegionData = rawData.regions[regKey];
+
+    selectedArea = 'all';
+    setMapBackground(regKey);
+    renderSidebarFilters();
+    renderMarkers();
+    updateStats();
+  };
+
+  // 4. RENDER FILTERS
+  function renderSidebarFilters() {
+    const areaContainer = document.getElementById('areaChipsContainer');
+    document.getElementById('subareaHeaderLabel').innerText = `Sub-Area (${currentRegionData.metadata.sub_areas.length} Area)`;
+
+    areaContainer.innerHTML = `<div class="area-chip active" id="chip-all" onclick="selectArea('all')">Semua Area</div>`;
+    currentRegionData.metadata.sub_areas.forEach(a => {
+      areaContainer.innerHTML += `<div class="area-chip" id="chip-${a.id}" onclick="selectArea('${a.id}')">${a.name}</div>`;
+    });
+
+    const tierContainer = document.getElementById('tierChipsContainer');
+    const tiers = [
+      { id: 'basic', name: 'Basic Chest', col: TIER_COLORS.basic },
+      { id: 'standard', name: 'Standard Chest', col: TIER_COLORS.standard },
+      { id: 'advanced', name: 'Advanced Chest', col: TIER_COLORS.advanced },
+      { id: 'premium', name: 'Premium Chest', col: TIER_COLORS.premium },
+      { id: 'tidal_heritage', name: 'Tidal Heritage', col: TIER_COLORS.tidal_heritage },
+      { id: 'sonance_casket', name: 'Relic Koleksi', col: TIER_COLORS.sonance_casket },
+    ];
+    tierContainer.innerHTML = '';
+    tiers.forEach(t => {
+      tierContainer.innerHTML += `
+        <div class="area-chip active" id="tier-chip-${t.id}" onclick="toggleTier('${t.id}')" style="display:flex; align-items:center; gap:6px;">
+          <span style="width:7px; height:7px; border-radius:50%; background:${t.col};"></span>
+          <span>${t.name}</span>
+        </div>
+      `;
+    });
+  }
+
+  // 5. RENDER MARKERS ON MAP
+  function renderMarkers() {
+    markersLayer.clearLayers();
+    allMarkers = [];
+
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    let counts = { open_world: 0, quest: 0, hidden_challenge: 0 };
+
+    currentRegionData.markers.forEach(item => {
+      if (item.acquisition in counts) counts[item.acquisition]++;
+
+      if (!activeCategories[item.acquisition]) return;
+      if (selectedArea !== 'all' && item.area_id !== selectedArea) return;
+      if (!activeTiers[item.tier]) return;
+
+      const isCollected = collectedIds.has(item.id);
+      if (!showCollected && isCollected) return;
+
+      if (searchQuery) {
+        const matchesName = item.name.toLowerCase().includes(searchQuery);
+        const matchesArea = item.area_name.toLowerCase().includes(searchQuery);
+        const matchesSub = item.sub_type.toLowerCase().includes(searchQuery);
+        const matchesGuide = item.guide.toLowerCase().includes(searchQuery);
+        if (!matchesName && !matchesArea && !matchesSub && !matchesGuide) return;
+      }
+
+      const catCol = CAT_COLORS[item.acquisition] || '#00E5FF';
+      let iconEmoji = '🗺️';
+      if (item.acquisition === 'quest') iconEmoji = '📜';
+      if (item.acquisition === 'hidden_challenge') iconEmoji = '🧩';
+      if (item.tier === 'sonance_casket') iconEmoji = '🔮';
+
+      const customIcon = L.divIcon({
+        className: 'custom-icon-wrapper',
+        html: `
+          <div class="custom-marker-icon ${isCollected ? 'collected' : ''}" style="background: ${catCol};">
+            <span style="font-size:13px;">${iconEmoji}</span>
+          </div>
+        `,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+
+      const marker = L.marker([item.y, item.x], { icon: customIcon });
+
+      const popupHtml = `
+        <div class="popup-card">
+          <div class="popup-badge" style="background: ${catCol}25; color: ${catCol}; border: 1px solid ${catCol}60;">
+            ${item.acquisition_badge}
+          </div>
+          <div class="popup-title">${item.name}</div>
+          <div class="popup-area">
+            <span>📍 ${item.area_name}</span> • <span>${item.altitude}</span>
+          </div>
+
+          <div class="guide-box">
+            <strong>Tipe: ${item.sub_type}</strong>
+            ${item.guide}
+          </div>
+
+          <div class="reward-row">
+            <div class="reward-item" style="color:var(--accent-cyan);">✦ ${item.rewards.astrite} Astrite</div>
+            <div class="reward-item" style="color:#F59E0B;">💰 ${item.rewards.shell_credit.toLocaleString()} Shell</div>
+            <div class="reward-item" style="color:#A855F7;">⚡ ${item.rewards.union_exp} EXP</div>
+          </div>
+
+          <button class="btn-collect ${isCollected ? 'claimed' : 'unclaimed'}" onclick="toggleCollect('${item.id}')">
+            ${isCollected ? '✓ Sudah Diklaim (Klik untuk Batal)' : 'Tandai Sudah Diambil'}
+          </button>
+        </div>
+      `;
+
+      marker.bindPopup(popupHtml);
+      markersLayer.addLayer(marker);
+      allMarkers.push({ marker, item });
+    });
+
+    document.getElementById('count-open_world').innerText = counts.open_world;
+    document.getElementById('count-quest').innerText = counts.quest;
+    document.getElementById('count-hidden_challenge').innerText = counts.hidden_challenge;
+  }
+
+  // Interactivity handlers
+  window.toggleCategory = function(cat) {
+    activeCategories[cat] = !activeCategories[cat];
+    document.getElementById(`cat-${cat}`).classList.toggle('active', activeCategories[cat]);
+    renderMarkers();
+  };
+
+  window.toggleAllCategories = function() {
+    const anyActive = Object.values(activeCategories).some(v => v);
+    for (let k in activeCategories) {
+      activeCategories[k] = !anyActive;
+      document.getElementById(`cat-${k}`).classList.toggle('active', !anyActive);
+    }
+    renderMarkers();
+  };
+
+  window.selectArea = function(areaId) {
+    selectedArea = areaId;
+    document.querySelectorAll('.area-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById(`chip-${areaId}`).classList.add('active');
+    renderMarkers();
+  };
+
+  window.resetAreaFilter = function() { selectArea('all'); };
+
+  window.toggleTier = function(tierId) {
+    activeTiers[tierId] = !activeTiers[tierId];
+    document.getElementById(`tier-chip-${tierId}`).classList.toggle('active', activeTiers[tierId]);
+    renderMarkers();
+  };
+
+  window.toggleCollect = function(id) {
+    if (collectedIds.has(id)) collectedIds.delete(id);
+    else collectedIds.add(id);
+    saveProgress();
+    renderMarkers();
+    map.closePopup();
+  };
+
+  window.handleSearch = function() { renderMarkers(); };
+
+  window.toggleCollectedVisibility = function() {
+    showCollected = !showCollected;
+    document.getElementById('collectedVisibilityText').innerText = showCollected ? 'Sembunyikan Sudah Diambil' : 'Tampilkan Semua';
+    document.getElementById('collectedVisibilityIcon').innerText = showCollected ? '👁️' : '🙈';
+    renderMarkers();
+  };
+
+  window.resetProgress = function() {
+    if (confirm("Reset seluruh tanda progress chest yang sudah diambil?")) {
+      collectedIds.clear();
+      saveProgress();
+      renderMarkers();
+    }
+  };
+
+  window.toggleSidebar = function() {
+    const s = document.getElementById('sidebar');
+    sidebarOpen = !sidebarOpen;
+    s.style.transform = sidebarOpen ? 'translateX(0)' : 'translateX(-100%)';
+  };
+
+  function updateStats() {
+    if (!currentRegionData) return;
+    const regionMarkers = currentRegionData.markers;
+    const total = regionMarkers.length;
+    let collectedInRegion = 0;
+    regionMarkers.forEach(m => {
+      if (collectedIds.has(m.id)) collectedInRegion++;
+    });
+
+    const pct = total > 0 ? Math.round((collectedInRegion / total) * 100) : 0;
+    document.getElementById('progressRegionName').innerText = `Progres ${currentRegionData.metadata.name}`;
+    document.getElementById('progressText').innerText = `${collectedInRegion} / ${total} (${pct}%)`;
+    document.getElementById('progressBar').style.width = `${pct}%`;
+  }
+
+  // BOOTSTRAP
+  initMap();
+  loadData();
+</script>
+</body>
+</html>
