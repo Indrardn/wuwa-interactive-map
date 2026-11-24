@@ -500,130 +500,244 @@
     sonance_casket: '#00F5D4'
   };
 
-  // GENERATE CUSTOM VECTOR MAP BACKDROPS PER REGION
+// GENERATE DETAILED VECTOR MAP BACKDROPS WITH FULL SUB-AREA LABELS & GEOGRAPHY
   function getRegionSvg(regionKey) {
-    if (regionKey === "rinascita") {
-      // Rinascita / Ragunna: Venice-style canal network, Averardo Vault, Riccioli Islands
+    if (regionKey === "jinzhou") {
+      // 10 Sub-Areas of Jinzhou / Huanglong
       return `
         <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
-          <rect width="1000" height="1000" fill="#09121E"/>
-          <defs><pattern id="gr" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#16263E" stroke-width="1"/></pattern></defs>
-          <rect width="1000" height="1000" fill="url(#gr)" />
-          <!-- Grand Canal Network -->
-          <path d="M 80 480 Q 300 350 500 500 T 920 480" fill="none" stroke="#00E5FF" stroke-width="45" stroke-opacity="0.3" stroke-linecap="round"/>
-          <path d="M 500 500 Q 520 750 480 920" fill="none" stroke="#00E5FF" stroke-width="30" stroke-opacity="0.25" stroke-linecap="round"/>
-          <!-- Ragunna City Cathedral Core -->
-          <rect x="420" y="420" width="160" height="160" rx="18" fill="#1A2840" stroke="#FFB703" stroke-width="2.5"/>
-          <text x="500" y="505" fill="#FFB703" font-size="14" font-weight="bold" text-anchor="middle">RAGUNNA CITY</text>
-          <!-- Averardo Vault -->
-          <circle cx="740" cy="350" r="75" fill="#1E1630" stroke="#9D4EDD" stroke-width="2"/>
-          <text x="740" y="355" fill="#9D4EDD" font-size="11" font-weight="bold" text-anchor="middle">AVERARDO VAULT</text>
-          <!-- Riccioli Islands -->
-          <circle cx="780" cy="720" r="85" fill="#142C30" stroke="#06D6A0" stroke-width="2"/>
-          <text x="780" y="725" fill="#06D6A0" font-size="12" font-weight="bold" text-anchor="middle">RICCIOLI ISLANDS</text>
+          <defs>
+            <radialGradient id="jzBg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#141E30"/>
+              <stop offset="100%" stop-color="#080C14"/>
+            </radialGradient>
+            <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1B283D" stroke-width="0.75" stroke-opacity="0.6"/>
+            </pattern>
+          </defs>
+          <rect width="1000" height="1000" fill="url(#jzBg)"/>
+          <rect width="1000" height="1000" fill="url(#gridPattern)"/>
+
+          <!-- Topographic Land Contours -->
+          <path d="M 120 160 Q 500 80 880 140 T 940 760 Q 520 980 100 820 Z" fill="#0D1624" stroke="#263854" stroke-width="3"/>
+
+          <!-- River System -->
+          <path d="M 240 100 Q 320 280 480 420 T 750 650 T 800 950" fill="none" stroke="#00E5FF" stroke-width="14" stroke-opacity="0.3" stroke-linecap="round"/>
+          <path d="M 480 420 Q 360 620 260 740" fill="none" stroke="#00E5FF" stroke-width="8" stroke-opacity="0.2" stroke-linecap="round"/>
+
+          <!-- AREA 1: GORGES OF SPIRITS (NW) -->
+          <path d="M 160 100 L 360 100 L 340 250 L 160 250 Z" fill="#162235" stroke="#3A506B" stroke-width="1.5" stroke-dasharray="4,4" rx="8"/>
+          <text x="260" y="175" fill="#A0AEC0" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">GORGES OF SPIRITS</text>
+          <text x="260" y="195" fill="#718096" font-size="10" text-anchor="middle">Lembah Tebing & Aliran Angin</text>
+
+          <!-- AREA 2: CENTRAL PLAINS (North Center) -->
+          <path d="M 320 220 L 540 220 L 530 400 L 310 400 Z" fill="#132032" stroke="#2B3A4F" stroke-width="1.5" rx="8"/>
+          <text x="427" y="315" fill="#CBD5E1" font-size="14" font-weight="bold" letter-spacing="1" text-anchor="middle">CENTRAL PLAINS</text>
+          <text x="427" y="335" fill="#718096" font-size="10" text-anchor="middle">Dataran Rumput & Pos Penjaga</text>
+
+          <!-- AREA 3: DESOROCK HIGHLAND (NE) -->
+          <path d="M 570 130 L 840 130 L 830 270 L 570 270 Z" fill="#1C1824" stroke="#4A3B54" stroke-width="1.5" rx="8"/>
+          <text x="708" y="200" fill="#E2E8F0" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">DESOROCK HIGHLAND</text>
+          <text x="708" y="220" fill="#A0AEC0" font-size="10" text-anchor="middle">Dataran Tinggi Batu Gersang</text>
+
+          <!-- AREA 4: NORFALL BARRENS (East) -->
+          <path d="M 720 280 L 930 280 L 930 470 L 720 470 Z" fill="#1C1520" stroke="#E63946" stroke-width="1.5" stroke-opacity="0.6" rx="8"/>
+          <text x="828" y="375" fill="#F87171" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">NORFALL BARRENS</text>
+          <text x="828" y="395" fill="#FCA5A5" font-size="10" text-anchor="middle">Zona Pertempuran Terlarang</text>
+
+          <!-- AREA 5: JINZHOU CITY (Center Core) -->
+          <rect x="400" y="430" width="200" height="140" rx="14" fill="#182A45" stroke="#00E5FF" stroke-width="2.5"/>
+          <text x="500" y="500" fill="#00E5FF" font-size="16" font-weight="800" letter-spacing="2" text-anchor="middle">JINZHOU CITY</text>
+          <text x="500" y="520" fill="#94A3B8" font-size="11" text-anchor="middle">Ibukota Benteng Huanglong</text>
+
+          <!-- AREA 6: TIGER'S MAW (South Center Crater) -->
+          <circle cx="533" cy="690" r="85" fill="#261E1A" stroke="#FFB703" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="533" y="685" fill="#FFB703" font-size="14" font-weight="bold" letter-spacing="1" text-anchor="middle">TIGER'S MAW</text>
+          <text x="533" y="705" fill="#FDE68A" font-size="10" text-anchor="middle">Kawah Tambang Industri</text>
+
+          <!-- AREA 7: DIM FOREST (SW) -->
+          <path d="M 150 600 L 410 600 L 400 880 L 150 880 Z" fill="#0D201A" stroke="#06D6A0" stroke-width="1.5" stroke-opacity="0.6" rx="10"/>
+          <text x="284" y="735" fill="#34D399" font-size="14" font-weight="bold" letter-spacing="1" text-anchor="middle">DIM FOREST</text>
+          <text x="284" y="755" fill="#A7F3D0" font-size="10" text-anchor="middle">Hutan Kanopi Lembab & Spora</text>
+
+          <!-- AREA 8: PORT CITY OF GUIXU (SE) -->
+          <path d="M 620 540 L 880 540 L 880 740 L 620 740 Z" fill="#181E2E" stroke="#3B82F6" stroke-width="1.5" rx="8"/>
+          <text x="752" y="640" fill="#60A5FA" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">PORT OF GUIXU</text>
+          <text x="752" y="660" fill="#93C5FD" font-size="10" text-anchor="middle">Reruntuhan Kota Pelabuhan</text>
+
+          <!-- AREA 9: WHINING AIX'S MIRE (Far SE) -->
+          <path d="M 650 750 L 920 750 L 920 940 L 650 940 Z" fill="#171A2E" stroke="#8B5CF6" stroke-width="1.5" rx="8"/>
+          <text x="786" y="845" fill="#C4B5FD" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">WHINING AIX'S MIRE</text>
+          <text x="786" y="865" fill="#DDD6FE" font-size="10" text-anchor="middle">Rawa Kabut Resonansi</text>
+
+          <!-- AREA 10: WUMING BAY (South Coast) -->
+          <path d="M 390 790 L 620 790 L 620 950 L 390 950 Z" fill="#102234" stroke="#0284C7" stroke-width="1.5" rx="8"/>
+          <text x="504" y="870" fill="#38BDF8" font-size="13" font-weight="bold" letter-spacing="1" text-anchor="middle">WUMING BAY</text>
+          <text x="504" y="890" fill="#BAE6FD" font-size="10" text-anchor="middle">Pesisir Teluk & Reruntuhan Kapal</text>
         </svg>
       `;
-    } else if (regionKey === "septimont") {
-      // Septimont: 7 Imperial Hills, Colosseum Arena, Red Sanguis Plateaus
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
-          <rect width="1000" height="1000" fill="#130D14"/>
-          <defs><radialGradient id="sangGrad" cx="75%" cy="32%" r="45%"><stop offset="0%" stop-color="#E63946" stop-opacity="0.3"/><stop offset="100%" stop-color="#130D14" stop-opacity="0"/></radialGradient></defs>
-          <circle cx="760" cy="320" r="280" fill="url(#sangGrad)" />
-          <!-- Septimont Fortress & Capitoline Hill -->
-          <polygon points="420,550 510,380 600,550" fill="#241B26" stroke="#FFB703" stroke-width="2.5"/>
-          <text x="510" y="500" fill="#FFB703" font-size="13" font-weight="bold" text-anchor="middle">SEPTIMONT CITY</text>
-          <!-- Sanguis Plateaus -->
-          <rect x="640" y="200" width="240" height="220" rx="16" fill="#2E1418" stroke="#E63946" stroke-width="2" stroke-dasharray="6,4"/>
-          <text x="760" y="315" fill="#E63946" font-size="13" font-weight="bold" text-anchor="middle">SANGUIS PLATEAUS</text>
-          <!-- Titanbone Canyon -->
-          <path d="M 160 220 Q 300 350 280 750" fill="none" stroke="#8E9AAF" stroke-width="12" stroke-opacity="0.4"/>
-        </svg>
-      `;
-    } else if (regionKey === "black_shores") {
-      // Black Shores: Quantum Data Hub, Tethys Deep, Black Petals
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
-          <rect width="1000" height="1000" fill="#080A10"/>
-          <defs><radialGradient id="tethysGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00E5FF" stop-opacity="0.3"/><stop offset="100%" stop-color="#080A10" stop-opacity="0"/></radialGradient></defs>
-          <circle cx="500" cy="500" r="420" fill="url(#tethysGrad)" />
-          <!-- Quantum Data Streams -->
-          <circle cx="500" cy="500" r="160" fill="#0E1624" stroke="#00E5FF" stroke-width="3"/>
-          <text x="500" y="505" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">TETHYS' DEEP</text>
-          <!-- Chronorift Metropolis Ruin -->
-          <rect x="220" y="640" width="220" height="180" rx="14" fill="#141828" stroke="#9D4EDD" stroke-width="2"/>
-          <text x="330" y="735" fill="#9D4EDD" font-size="12" font-weight="bold" text-anchor="middle">CHRONORIFT</text>
-        </svg>
-      `;
-    }
-    if (regionKey === "mengzhou") {
-      // Mengzhou: Beautiful Waterways, Xuanfang Lake, Simulacrum Grid
+    } else if (regionKey === "mengzhou") {
+      // Mengzhou: 5 Sub-Areas
       return `
         <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
           <rect width="1000" height="1000" fill="#09101C"/>
           <defs>
-            <pattern id="g" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#162238" stroke-width="1"/></pattern>
-            <radialGradient id="simGrad" cx="70%" cy="75%" r="40%"><stop offset="0%" stop-color="#9D4EDD" stop-opacity="0.25"/><stop offset="100%" stop-color="#09101C" stop-opacity="0"/></radialGradient>
+            <pattern id="mg" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#162238" stroke-width="1"/></pattern>
           </defs>
-          <rect width="1000" height="1000" fill="url(#g)" />
-          <circle cx="700" cy="740" r="220" fill="url(#simGrad)" />
-          <!-- Xuanfang Rivers and Waterways -->
-          <path d="M 120 180 Q 320 280 500 480 T 880 750" fill="none" stroke="#00E5FF" stroke-width="28" stroke-opacity="0.3" stroke-linecap="round"/>
-          <path d="M 500 480 Q 350 720 180 850" fill="none" stroke="#00E5FF" stroke-width="16" stroke-opacity="0.2" stroke-linecap="round"/>
-          <!-- Mountains (Fang Peaks & Xuan Peaks) -->
-          <polygon points="180,320 280,240 380,320" fill="#141E30" stroke="#263854" stroke-width="2"/>
-          <polygon points="680,320 780,220 880,320" fill="#141E30" stroke="#263854" stroke-width="2"/>
-          <!-- Xuanfang Hold Fortress -->
-          <rect x="440" y="420" width="120" height="120" rx="14" fill="#18243C" stroke="#FFB703" stroke-width="2"/>
-          <text x="500" y="485" fill="#FFB703" font-size="14" font-weight="bold" text-anchor="middle">XUANFANG</text>
-          <!-- Simulacrum Nexus Virtual Core -->
-          <rect x="620" y="660" width="160" height="160" rx="20" fill="#1B1430" stroke="#9D4EDD" stroke-width="2" stroke-dasharray="6,4"/>
-          <text x="700" y="745" fill="#9D4EDD" font-size="13" font-weight="bold" text-anchor="middle">SIMULACRUM</text>
+          <rect width="1000" height="1000" fill="url(#mg)"/>
+
+          <!-- River Artery -->
+          <path d="M 80 180 Q 320 280 500 480 T 920 780" fill="none" stroke="#00E5FF" stroke-width="32" stroke-opacity="0.3" stroke-linecap="round"/>
+
+          <!-- SUB-AREAS -->
+          <rect x="180" y="260" width="180" height="190" rx="12" fill="#141E30" stroke="#3A506B" stroke-width="1.5"/>
+          <text x="268" y="355" fill="#CBD5E1" font-size="14" font-weight="bold" text-anchor="middle">WESTERN FANG</text>
+          <text x="268" y="375" fill="#8E9AAF" font-size="10" text-anchor="middle">Puncak Tebing Barat</text>
+
+          <rect x="660" y="270" width="180" height="190" rx="12" fill="#141E30" stroke="#3A506B" stroke-width="1.5"/>
+          <text x="750" y="360" fill="#CBD5E1" font-size="14" font-weight="bold" text-anchor="middle">EASTERN XUAN</text>
+          <text x="750" y="380" fill="#8E9AAF" font-size="10" text-anchor="middle">Puncak Tebing Timur</text>
+
+          <rect x="420" y="400" width="160" height="160" rx="16" fill="#1C2B45" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="500" y="475" fill="#FFB703" font-size="15" font-weight="800" text-anchor="middle">XUANFANG HOLD</text>
+          <text x="500" y="495" fill="#FDE68A" font-size="10" text-anchor="middle">Benteng Pusat Jalur Air</text>
+
+          <rect x="330" y="650" width="180" height="170" rx="12" fill="#162624" stroke="#06D6A0" stroke-width="1.5"/>
+          <text x="421" y="730" fill="#34D399" font-size="14" font-weight="bold" text-anchor="middle">SOUTHERN YUAN</text>
+          <text x="421" y="750" fill="#A7F3D0" font-size="10" text-anchor="middle">Perbukitan & Hutan Selatan</text>
+
+          <rect x="640" y="650" width="190" height="180" rx="16" fill="#201530" stroke="#9D4EDD" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="734" y="735" fill="#C084FC" font-size="14" font-weight="bold" text-anchor="middle">SIMULACRUM NEXUS</text>
+          <text x="734" y="755" fill="#E9D5FF" font-size="10" text-anchor="middle">Lab Virtual Dimensi Maya</text>
         </svg>
       `;
-    } else if (regionKey === "jinzhou") {
-      // Jinzhou: Grand Huanglong Valley, Gorges of Spirits, Tiger's Maw Crater, City
+    } else if (regionKey === "rinascita") {
+      // Rinascita: 6 Sub-Areas
       return `
         <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
-          <rect width="1000" height="1000" fill="#0A0E17"/>
-          <defs><pattern id="g2" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="#162032" stroke-width="1"/></pattern></defs>
-          <rect width="1000" height="1000" fill="url(#g2)" />
-          <!-- Central Plains & Mountains -->
-          <path d="M 120 180 Q 500 100 850 180 T 880 750 Q 500 950 150 780 Z" fill="#101826" stroke="#263854" stroke-width="3"/>
-          <!-- Jinzhou City Center -->
-          <circle cx="500" cy="500" r="90" fill="#172238" stroke="#00E5FF" stroke-width="2.5"/>
-          <text x="500" y="505" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">JINZHOU CITY</text>
-          <!-- Tiger's Maw Mine Pit -->
-          <circle cx="530" cy="690" r="70" fill="#241E18" stroke="#FFB703" stroke-width="2" stroke-dasharray="4,4"/>
-          <text x="530" y="695" fill="#FFB703" font-size="11" font-weight="bold" text-anchor="middle">TIGER'S MAW</text>
-          <!-- Dim Forest Vines -->
-          <path d="M 200 680 Q 280 820 380 750" fill="none" stroke="#06D6A0" stroke-width="8" stroke-opacity="0.3"/>
+          <rect width="1000" height="1000" fill="#09121E"/>
+          <!-- Canals -->
+          <path d="M 80 480 Q 300 350 500 500 T 920 480" fill="none" stroke="#00E5FF" stroke-width="40" stroke-opacity="0.3" stroke-linecap="round"/>
+          <path d="M 500 500 Q 520 750 480 920" fill="none" stroke="#00E5FF" stroke-width="25" stroke-opacity="0.25" stroke-linecap="round"/>
+
+          <rect x="200" y="210" width="180" height="180" rx="12" fill="#191F2D" stroke="#64748B" stroke-width="1.5"/>
+          <text x="290" y="300" fill="#E2E8F0" font-size="13" font-weight="bold" text-anchor="middle">PENITENT'S END</text>
+
+          <rect x="420" y="420" width="170" height="170" rx="18" fill="#1A2840" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="505" y="505" fill="#FFB703" font-size="15" font-weight="800" text-anchor="middle">RAGUNNA CITY</text>
+          <text x="505" y="525" fill="#CBD5E1" font-size="10" text-anchor="middle">Kota Kanal Megah</text>
+
+          <rect x="650" y="260" width="170" height="170" rx="14" fill="#201830" stroke="#9D4EDD" stroke-width="2"/>
+          <text x="735" y="345" fill="#C084FC" font-size="13" font-weight="bold" text-anchor="middle">AVERARDO VAULT</text>
+
+          <rect x="200" y="630" width="180" height="180" rx="12" fill="#14282B" stroke="#06D6A0" stroke-width="1.5"/>
+          <text x="290" y="720" fill="#34D399" font-size="13" font-weight="bold" text-anchor="middle">WHISPERWIND</text>
+
+          <rect x="690" y="630" width="180" height="180" rx="14" fill="#142A38" stroke="#38BDF8" stroke-width="2"/>
+          <text x="780" y="720" fill="#38BDF8" font-size="13" font-weight="bold" text-anchor="middle">RICCIOLI ISLANDS</text>
+
+          <rect x="440" y="760" width="190" height="170" rx="12" fill="#1D2230" stroke="#E2E8F0" stroke-width="1.5"/>
+          <text x="535" y="845" fill="#F1F5F9" font-size="13" font-weight="bold" text-anchor="middle">FAGACEAE PENINSULA</text>
+        </svg>
+      `;
+    } else if (regionKey === "septimont") {
+      // Septimont: 5 Sub-Areas
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#130D14"/>
+          <circle cx="760" cy="320" r="260" fill="#E63946" fill-opacity="0.15"/>
+
+          <rect x="180" y="240" width="180" height="180" rx="12" fill="#1F1A28" stroke="#6B7280" stroke-width="1.5"/>
+          <text x="270" y="330" fill="#E5E7EB" font-size="13" font-weight="bold" text-anchor="middle">TITANBONE EXPANSE</text>
+
+          <rect x="660" y="230" width="190" height="180" rx="14" fill="#2E1418" stroke="#E63946" stroke-width="2"/>
+          <text x="755" y="320" fill="#F87171" font-size="13" font-weight="bold" text-anchor="middle">SANGUIS PLATEAUS</text>
+          <text x="755" y="340" fill="#FECACA" font-size="10" text-anchor="middle">Dataran Merah Darah</text>
+
+          <rect x="420" y="400" width="170" height="170" rx="16" fill="#241B26" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="505" y="485" fill="#FFB703" font-size="15" font-weight="800" text-anchor="middle">SEPTIMONT CITY</text>
+          <text x="505" y="505" fill="#FDE68A" font-size="10" text-anchor="middle">Tujuh Bukit Kekaisaran</text>
+
+          <rect x="200" y="630" width="180" height="180" rx="12" fill="#1D1822" stroke="#4B5563" stroke-width="1.5"/>
+          <text x="290" y="720" fill="#D1D5DB" font-size="13" font-weight="bold" text-anchor="middle">MOURNFELL CANYON</text>
+
+          <rect x="620" y="660" width="180" height="180" rx="14" fill="#251A30" stroke="#A855F7" stroke-width="1.5"/>
+          <text x="710" y="750" fill="#C084FC" font-size="13" font-weight="bold" text-anchor="middle">VALE OF GLORY</text>
+        </svg>
+      `;
+    } else if (regionKey === "black_shores") {
+      // The Black Shores: 5 Sub-Areas
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+          <rect width="1000" height="1000" fill="#080A10"/>
+          <circle cx="500" cy="500" r="420" fill="#00E5FF" fill-opacity="0.1"/>
+
+          <rect x="210" y="250" width="180" height="180" rx="12" fill="#0F172A" stroke="#059669" stroke-width="1.5"/>
+          <text x="300" y="340" fill="#34D399" font-size="13" font-weight="bold" text-anchor="middle">HAVEN OF SPROUTS</text>
+
+          <rect x="640" y="200" width="190" height="180" rx="14" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5"/>
+          <text x="735" y="290" fill="#38BDF8" font-size="13" font-weight="bold" text-anchor="middle">TD OBSERVATORY</text>
+
+          <circle cx="500" cy="500" r="130" fill="#0B132B" stroke="#00E5FF" stroke-width="3"/>
+          <text x="500" y="495" fill="#00E5FF" font-size="16" font-weight="800" text-anchor="middle">TETHYS' DEEP</text>
+          <text x="500" y="515" fill="#94A3B8" font-size="10" text-anchor="middle">Pusat Data Kuantum</text>
+
+          <rect x="270" y="660" width="190" height="180" rx="14" fill="#141828" stroke="#9D4EDD" stroke-width="2"/>
+          <text x="365" y="750" fill="#C084FC" font-size="13" font-weight="bold" text-anchor="middle">CHRONORIFT</text>
+
+          <rect x="630" y="650" width="190" height="180" rx="14" fill="#1E1B4B" stroke="#818CF8" stroke-width="1.5"/>
+          <text x="725" y="740" fill="#A5B4FC" font-size="13" font-weight="bold" text-anchor="middle">EIDOSCOPE HUB</text>
         </svg>
       `;
     } else if (regionKey === "mt_firmament") {
-      // Mt. Firmament: Sacred Floating Island of Sentinel Jue & Tianqu Tree
+      // Mt. Firmament: 5 Sub-Areas
       return `
         <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
           <rect width="1000" height="1000" fill="#080C14"/>
-          <defs><radialGradient id="tianqu" cx="52%" cy="48%" r="45%"><stop offset="0%" stop-color="#FFB703" stop-opacity="0.25"/><stop offset="100%" stop-color="#080C14" stop-opacity="0"/></radialGradient></defs>
-          <circle cx="520" cy="480" r="420" fill="url(#tianqu)" />
-          <!-- Island Contour -->
-          <path d="M 250 380 Q 450 160 700 240 T 820 620 Q 620 880 320 800 Z" fill="#121B2C" stroke="#00E5FF" stroke-width="2.5"/>
-          <!-- Sacred Loong's Crest Peak -->
-          <polygon points="450,260 520,180 590,260" fill="#1C2740" stroke="#FFB703" stroke-width="2"/>
-          <text x="520" y="240" fill="#FFB703" font-size="12" font-weight="bold" text-anchor="middle">LOONG'S CREST</text>
-          <!-- Hongzhen Waterfront -->
-          <rect x="440" y="700" width="140" height="80" rx="10" fill="#19243A" stroke="#00E5FF" stroke-width="1.5"/>
-          <text x="510" y="745" fill="#00E5FF" font-size="12" font-weight="bold" text-anchor="middle">HONGZHEN</text>
+          <circle cx="504" cy="249" r="240" fill="#FFB703" fill-opacity="0.12"/>
+
+          <polygon points="420,290 504,170 590,290" fill="#1C2740" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="504" y="245" fill="#FFB703" font-size="14" font-weight="800" text-anchor="middle">LOONG'S CREST</text>
+          <text x="504" y="265" fill="#FDE68A" font-size="10" text-anchor="middle">Puncak Sakral Sentinel Jue</text>
+
+          <circle cx="518" cy="476" r="90" fill="#172436" stroke="#00E5FF" stroke-width="2"/>
+          <text x="518" y="475" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">TIANQU TREE</text>
+          <text x="518" y="495" fill="#93C5FD" font-size="10" text-anchor="middle">Pohon Waktu Abadi</text>
+
+          <rect x="180" y="370" width="180" height="180" rx="14" fill="#132034" stroke="#3A506B" stroke-width="1.5"/>
+          <text x="270" y="460" fill="#CBD5E1" font-size="13" font-weight="bold" text-anchor="middle">XUANJI RIDGES</text>
+
+          <rect x="670" y="380" width="180" height="180" rx="14" fill="#1F1932" stroke="#A855F7" stroke-width="1.5"/>
+          <text x="760" y="470" fill="#C084FC" font-size="13" font-weight="bold" text-anchor="middle">MIANLOONG CHAMBER</text>
+
+          <rect x="420" y="690" width="190" height="120" rx="14" fill="#182A45" stroke="#38BDF8" stroke-width="2"/>
+          <text x="515" y="745" fill="#38BDF8" font-size="14" font-weight="800" text-anchor="middle">HONGZHEN VILLAGE</text>
+          <text x="515" y="765" fill="#BAE6FD" font-size="10" text-anchor="middle">Desa Tepi Laut Tenang</text>
         </svg>
       `;
     } else {
-      // Lahai-Roi Cave
+      // Lahai-Roi: 6 Sub-Areas
       return `
         <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
           <rect width="1000" height="1000" fill="#0A0E17"/>
-          <path d="M 120 280 Q 300 120 600 160 T 900 320 Q 950 650 780 880 T 350 900 Q 80 750 120 280 Z" fill="#101826" stroke="#263854" stroke-width="3"/>
-          <path d="M 280 400 Q 420 300 580 440 T 780 500 Q 650 720 420 680 Z" fill="#141E30" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <rect x="410" y="70" width="180" height="160" rx="14" fill="#1C1826" stroke="#E63946" stroke-width="1.5"/>
+          <text x="500" y="150" fill="#F87171" font-size="13" font-weight="bold" text-anchor="middle">FANGSPIRE CHASM</text>
+
+          <rect x="250" y="310" width="180" height="180" rx="14" fill="#152238" stroke="#00E5FF" stroke-width="2"/>
+          <text x="340" y="400" fill="#00E5FF" font-size="14" font-weight="bold" text-anchor="middle">STARTORCH ACADEMY</text>
+
+          <rect x="550" y="260" width="180" height="180" rx="14" fill="#172624" stroke="#06D6A0" stroke-width="1.5"/>
+          <text x="640" y="350" fill="#34D399" font-size="13" font-weight="bold" text-anchor="middle">REBIRTH UPLANDS</text>
+
+          <circle cx="550" cy="520" r="95" fill="#1A1828" stroke="#FFB703" stroke-width="2.5"/>
+          <text x="550" y="520" fill="#FFB703" font-size="14" font-weight="800" text-anchor="middle">GIANT'S GAZE</text>
+          <text x="550" y="540" fill="#FDE68A" font-size="10" text-anchor="middle">Mata Raksasa Bawah Tanah</text>
+
+          <rect x="270" y="640" width="190" height="180" rx="14" fill="#1B1F2E" stroke="#64748B" stroke-width="1.5"/>
+          <text x="365" y="735" fill="#E2E8F0" font-size="13" font-weight="bold" text-anchor="middle">ETCHING PLAINS</text>
+
+          <rect x="590" y="680" width="190" height="180" rx="14" fill="#282218" stroke="#D97706" stroke-width="2"/>
+          <text x="685" y="775" fill="#FBBF24" font-size="13" font-weight="bold" text-anchor="middle">MAWBURROW DESERT</text>
         </svg>
       `;
     }
